@@ -1,145 +1,132 @@
-import pygame 
-import random 
+import pygame
+import time
+import random
 
-#Display
+# Inicializando o pygame
 pygame.init()
-pygame.display.set_caption("Jogo da Cobrinha")
-largura, altura = 1200, 800
-tela = pygame.display.set_mode((largura, altura))
-relogio = pygame.time.Clock()
 
-#Cores
-preta = (0, 0, 0)
-branca = (255, 255, 255)
-vermelha = (255, 0, 0)
+# Definindo as cores
+branco = (255, 255, 255)
+preto = (0, 0, 0)
+vermelho = (213, 50, 80)
 verde = (0, 255, 0)
-roxa = (153, 51, 153)
-azul = (0, 0, 255)
+azul = (50, 153, 213)
 
-#Cobrinha
-tamanho_quadrado = 20
-velocidade_jogo = 15 
+# Definindo o tamanho da tela
+largura_tela = 600
+altura_tela = 400
 
+# Criando a tela
+tela = pygame.display.set_mode((largura_tela, altura_tela))
+pygame.display.set_caption('Jogo da Cobrinha')
 
-def gerar_comida():
-    comida_x = (random.randrange(0, largura - tamanho_quadrado) / float(tamanho_quadrado))  * float(tamanho_quadrado)
-    comida_y = (random.randrange(0, altura - tamanho_quadrado) / float(tamanho_quadrado)) * float(tamanho_quadrado)
-    return comida_x, comida_y
+# Definindo o relógio
+clock = pygame.time.Clock()
 
+# Definindo as variáveis da cobrinha
+largura_cobra = 10
+altura_cobra = 10
+velocidade_cobra = 15
 
-def desenhar_comida(tamanho, comida_x, comida_y):
-    pygame.draw.rect(tela, vermelha, [comida_x, comida_y, tamanho, tamanho])
+# Fontes
+fonte_pontos = pygame.font.SysFont("bahnschrift", 25)
 
+# Função para exibir a pontuação
+def nossa_pontuacao(pontos):
+    valor = fonte_pontos.render("Pontuação: " + str(pontos), True, preto)
+    tela.blit(valor, [0, 0])
 
-def desenhar_cobra(tamanho, pixels):
-    for pixel in pixels:
-        pygame.draw.rect(tela, azul, [pixel[0], pixel[1], tamanho, tamanho])
+# Função para desenhar a cobrinha
+def nossa_cobra(largura_cobra, altura_cobra, lista_cobra):
+    for x in lista_cobra:
+        pygame.draw.rect(tela, verde, [x[0], x[1], largura_cobra, altura_cobra])
 
-def desenhar_pontuacao(pontuacao):
-    fonte = pygame.font.SysFont("Helvetica", 35)
-    texto = fonte.render(f"Pontos: {pontuacao}", True, roxa)
-    tela.blit(texto, [1, 1])
+# Função para o jogo
+def jogo():
+    fim_de_jogo = False
+    ganhou = False
 
-def selecionar_velocidade(tecla):
-    if tecla == pygame.K_DOWN:
-        velocidade_x = 0
-        velocidade_y = tamanho_quadrado
-    elif tecla == pygame.K_UP:
-        velocidade_x = 0
-        velocidade_y = -tamanho_quadrado
-    elif tecla == pygame.K_RIGHT:
-        velocidade_x = tamanho_quadrado
-        velocidade_y = 0
-    elif tecla == pygame.K_LEFT:
-        velocidade_x = -tamanho_quadrado
-        velocidade_y = 0
+    # Posições iniciais da cobrinha
+    x_cobra = largura_tela / 2
+    y_cobra = altura_tela / 2
+    x_cobra_mudanca = 0
+    y_cobra_mudanca = 0
 
-    return velocidade_x, velocidade_y
+    # Lista da cobrinha
+    lista_cobra = []
+    comprimento_cobra = 1
 
-#Jogo
-def rodar_jogo():
-    fim_jogo = False
+    # Posição da comida
+    comida_x = round(random.randrange(0, largura_tela - largura_cobra) / 10.0) * 10.0
+    comida_y = round(random.randrange(0, altura_tela - altura_cobra) / 10.0) * 10.0
 
-    x = largura / 2
-    y = altura / 2 
+    # Pontuação
+    pontos = 0
 
-    velocidade_x = 0 
-    velocidade_y = 0 
+    # Loop principal do jogo
+    while not fim_de_jogo:
 
-    tamanho_cobra = 1 
-    pixels = []
-
-
-    comida_x, comida_y = gerar_comida()
-   
-
-    while not fim_jogo:
-        tela .fill(verde)
-
-        
+        # Checando se o jogador perdeu
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
-                fim_jogo = True 
-            elif evento.type == pygame. KEYDOWN:
-                velocidade_x, velocidade_y = selecionar_velocidade(evento.key)
+                fim_de_jogo = True
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_LEFT:
+                    x_cobra_mudanca = -largura_cobra
+                    y_cobra_mudanca = 0
+                elif evento.key == pygame.K_RIGHT:
+                    x_cobra_mudanca = largura_cobra
+                    y_cobra_mudanca = 0
+                elif evento.key == pygame.K_UP:
+                    y_cobra_mudanca = -altura_cobra
+                    x_cobra_mudanca = 0
+                elif evento.key == pygame.K_DOWN:
+                    y_cobra_mudanca = altura_cobra
+                    x_cobra_mudanca = 0
 
+        # Se a cobrinha sair da tela, o jogo acaba
+        if x_cobra >= largura_tela or x_cobra < 0 or y_cobra >= altura_tela or y_cobra < 0:
+            fim_de_jogo = True
 
+        x_cobra += x_cobra_mudanca
+        y_cobra += y_cobra_mudanca
+        tela.fill(azul)
 
-        #desenhar comida
-        desenhar_comida(tamanho_quadrado, comida_x, comida_y)
+        pygame.draw.rect(tela, vermelho, [comida_x, comida_y, largura_cobra, altura_cobra])
 
+        # Atualiza a lista da cobrinha
+        cabeca_cobra = []
+        cabeca_cobra.append(x_cobra)
+        cabeca_cobra.append(y_cobra)
+        lista_cobra.append(cabeca_cobra)
 
-        #atualizar posição da cobrinha
-        if x < 0 or x >= largura or y < 0 or y >= altura:
-            fim_jogo = True
+        if len(lista_cobra) > comprimento_cobra:
+            del lista_cobra[0]
 
+        # Se a cobrinha colidir com ela mesma, o jogo acaba
+        for x in lista_cobra[:-1]:
+            if x == cabeca_cobra:
+                fim_de_jogo = True
 
+        nossa_cobra(largura_cobra, altura_cobra, lista_cobra)
+        nossa_pontuacao(pontos)
 
-
-        x += velocidade_x
-        y += velocidade_y
-
-        
-
-        #desenhar cobra
-        pixels.append([x, y])
-        if len(pixels) > tamanho_cobra:
-            del pixels[0]
-
-        #cobrinha bateu no próprio corpo
-        for pixel in pixels[:-1]: 
-            if pixel == [x, y]:
-                fim_jogo = True
-        
-        desenhar_cobra(tamanho_quadrado, pixels)
-       
-       
-       
-       
-        desenhar_pontuacao(tamanho_cobra - 1)
-
-
-
-
-
-
-
-        #atualizar tela 
         pygame.display.update()
 
+        # Se a cobrinha comer a comida, aumenta o comprimento e a pontuação
+        if x_cobra == comida_x and y_cobra == comida_y:
+            comida_x = round(random.randrange(0, largura_tela - largura_cobra) / 10.0) * 10.0
+            comida_y = round(random.randrange(0, altura_tela - altura_cobra) / 10.0) * 10.0
+            comprimento_cobra += 1
+            pontos += 10
 
+        # Controlando a velocidade da cobrinha
+        clock.tick(velocidade_cobra)
 
-        if abs(x - comida_x) < tamanho_quadrado and abs(y - comida_y) < tamanho_quadrado:
+    # Mensagem de fim de jogo
+    if fim_de_jogo:
+        pygame.quit()
+        quit()
 
-            tamanho_cobra += 1
-            comida_x, comida_y = gerar_comida()
-
-
-        relogio.tick(velocidade_jogo)
-
-
-
-
-
-rodar_jogo() 
-pygame.quit()
+# Rodando o jogo
+jogo()
