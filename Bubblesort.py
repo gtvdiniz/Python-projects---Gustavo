@@ -1,3 +1,4 @@
+#Programa para utilização do algoritmo de ordenação Bubblesort
 import time
 
 # Lista de números a ser ordenada
@@ -49,3 +50,5 @@ for i in range(tamanho):
 
 # Imprime o tempo total de execução
 print(f"\n\nTempo total de execução do Bubble Sort foi de: {fim - inicio:.6f} segundos\n")
+
+
